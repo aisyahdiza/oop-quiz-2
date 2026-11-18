@@ -54,20 +54,21 @@ class OrderListViewModel:
 
     def set_filter(self, text):
         self.filter = text.strip().casefold()
-        # TODO(Q075): self.recompute()
+        self.recompute()
 
     def set_only_status(self, status):
         self.only_status = status
-        # TODO(Q075): self.recompute()
+        self.recompute()
 
     def set_sort(self, key):
         self.sort = key
-        # TODO(Q075): self.recompute()
+        self.recompute()
 
     def recompute(self):
-        # TODO(Q075): rows = [ ... for o in sorted(book.orders(), key=SORT_KEYS[sort])
-        #   if filter in o.customer.casefold() and (only_status is None or status == only_status)]
-        #   if rows != shown: shown = rows; updates += 1; view(rows)
+        rows = [f"{o.id} {o.customer} {o.status} {o.ready_hour}:00"
+                for o in sorted(self.book.orders(), key=SORT_KEYS[self.sort])
+                if self.filter in o.customer.casefold() and (self.only_status is None or o.status == self.only_status)]
+        if rows != self.shown: self.shown = rows; self.updates += 1; self.view(rows)
         pass
 
 

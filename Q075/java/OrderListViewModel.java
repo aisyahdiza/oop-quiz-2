@@ -55,11 +55,9 @@ public class OrderListViewModel {
 
     // ---------------- the view-model: all the view's decisions, none of its widgets ----------------
     static final Comparator<Order> BY_READY =
-            // TODO(Q075): Comparator.comparingInt((Order o) -> o.readyHour).thenComparing(o -> o.id);
-            Comparator.comparing(o -> o.id);
+            Comparator.comparingInt((Order o) -> o.readyHour).thenComparing(o -> o.id);
     static final Comparator<Order> BY_CUSTOMER =
-            // TODO(Q075): Comparator.comparing((Order o) -> o.customer, String.CASE_INSENSITIVE_ORDER).thenComparing(o -> o.id);
-            Comparator.comparing(o -> o.id);
+            Comparator.comparing((Order o) -> o.customer, String.CASE_INSENSITIVE_ORDER).thenComparing(o -> o.id);
 
     private final OrderBook book;
     private final Consumer<List<String>> view;
@@ -78,22 +76,27 @@ public class OrderListViewModel {
 
     void setFilter(String text) {
         filter = text.strip().toLowerCase(Locale.ROOT);
-        // TODO(Q075): recompute();
+        recompute();
     }
 
     void setOnlyStatus(Status s) {
         onlyStatus = s;
-        // TODO(Q075): recompute();
+        recompute();
     }
 
     void setSortByCustomer(boolean byCustomer) {
         sort = byCustomer ? BY_CUSTOMER : BY_READY;
-        // TODO(Q075): recompute();
+        recompute();
     }
 
     private void recompute() {
-        // TODO(Q075): book.orders().stream().filter(name contains filter).filter(status matches)
-        //   .sorted(sort).map(format).toList(); if (!rows.equals(shown)) { shown=rows; updates++; view.accept(rows); }
+        List<String> rows = book.orders().stream()
+                .filter(o -> o.customer.toLowerCase(Locale.ROOT).contains(filter))
+                .filter(o -> onlyStatus == null || o.status == onlyStatus)
+                .sorted(sort)
+                .map(o -> o.id + " " + o.customer + " " + o.status + " " + o.readyHour + ":00")
+                .toList();
+        if (!rows.equals(shown)) { shown=rows; updates++; view.accept(rows); }
     }
 
     public static void main(String[] args) {
