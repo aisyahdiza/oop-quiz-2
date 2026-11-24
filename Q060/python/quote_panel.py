@@ -14,7 +14,25 @@ def quote(kg_text, code, express):
     # TODO(Q060): parse kg; handle ValueError; reject kg<=0 or kg>50;
     #   half_kg = math.ceil(2*max(kg, min_kg)); price = rate*half_kg//2; hours;
     #   if express: price = 3*price//2, hours = max(6, hours//4); return the label.
-    return ""
+    label, rate, min_kg, hours = SERVICES[code]
+
+    try:
+        kg = float(kg_text.strip())
+    except ValueError:
+        return "Enter a number"
+
+    if not (0 < kg <= 50):
+        return "Weight must be between 0 and 50 kg"
+
+    half_kg = math.ceil(2 * max(kg, min_kg))
+    price = rate * half_kg // 2
+
+    if express:
+        price = 3 * price // 2
+        hours = max(6, hours // 4)
+
+    tag = " express" if express else ""
+    return f"{code} {half_kg / 2:.1f} kg{tag}: Rp{price:,}, ready in {hours} h"
 
 
 class QuoteController:
@@ -31,6 +49,12 @@ class QuoteController:
     def refresh(self, explicit):
         # TODO(Q060): self.handled += 1; if explicit: self.quoted = True;
         #   if self.quoted: self.label = quote(self.kg_text, self.code, self.express)
+        self.handled += 1
+        if explicit:
+            self.quoted = True
+
+        if self.quoted:
+            self.label = quote(self.kg_text, self.code, self.express)
         pass
 
     # one method per kind of event
